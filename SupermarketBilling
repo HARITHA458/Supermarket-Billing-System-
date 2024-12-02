@@ -1,0 +1,131 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class SupermarketBilling {
+    public static void main(String[] args) {
+        // Sample products with prices and stock
+        String[] products = {"Apple", "Banana", "Milk", "Bread", "Rice", "Eggs", "Chicken", "Soap", "Shampoo", "Toothpaste"};
+        double[] prices = {1.0, 0.5, 1.5, 2.0, 1.2, 0.1, 5.0, 0.8, 3.5, 2.5};
+        int[] stock = {100, 150, 50, 30, 100, 200, 20, 50, 40, 60}; // Initial stock for each product
+
+        JFrame frame = new JFrame("Supermarket Billing System");
+        frame.setSize(600, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Components
+        JLabel titleLabel = new JLabel("Welcome to the Supermarket Billing System!", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+
+        JTextArea productList = new JTextArea(10, 30);
+        productList.setEditable(false);
+        StringBuilder productDetails = new StringBuilder("Available Products:\n");
+        for (int i = 0; i < products.length; i++) {
+            productDetails.append((i + 1))
+                    .append(". ")
+                    .append(products[i])
+                    .append(" - $")
+                    .append(prices[i])
+                    .append(" (Stock: ")
+                    .append(stock[i])
+                    .append(")\n");
+        }
+        productList.setText(productDetails.toString());
+
+        JLabel productLabel = new JLabel("Enter Product Number (1-10):");
+        JTextField productField = new JTextField(10);
+
+        JLabel quantityLabel = new JLabel("Enter Quantity:");
+        JTextField quantityField = new JTextField(10);
+
+        JButton addButton = new JButton("Add to Cart");
+        JButton checkoutButton = new JButton("Checkout");
+
+        JTextArea cartDetails = new JTextArea(5, 30);
+        cartDetails.setEditable(false);
+
+        JLabel totalLabel = new JLabel("Total: $0.0");
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(productLabel);
+        inputPanel.add(productField);
+        inputPanel.add(quantityLabel);
+        inputPanel.add(quantityField);
+        inputPanel.add(addButton);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(checkoutButton);
+        bottomPanel.add(totalLabel);
+
+        // Layout
+        frame.setLayout(new BorderLayout());
+        frame.add(titleLabel, BorderLayout.NORTH);
+        frame.add(new JScrollPane(productList), BorderLayout.WEST);
+        frame.add(new JScrollPane(cartDetails), BorderLayout.CENTER);
+        frame.add(inputPanel, BorderLayout.SOUTH);
+        frame.add(bottomPanel, BorderLayout.EAST);
+
+        // Cart and total
+        StringBuilder cart = new StringBuilder();
+        final double[] totalAmount = {0};
+
+        // Button actions
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int productChoice = Integer.parseInt(productField.getText());
+                    int quantity = Integer.parseInt(quantityField.getText());
+
+                    if (productChoice < 1 || productChoice > products.length) {
+                        JOptionPane.showMessageDialog(frame, "Invalid product number. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    if (quantity > stock[productChoice - 1]) {
+                        JOptionPane.showMessageDialog(frame, "Sorry, not enough stock available!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Update stock and calculate price
+                    stock[productChoice - 1] -= quantity;
+                    double price = prices[productChoice - 1] * quantity;
+                    totalAmount[0] += price;
+
+                    // Update cart
+                    cart.append(quantity).append(" x ").append(products[productChoice - 1]).append(" - $").append(price).append("\n");
+                    cartDetails.setText(cart.toString());
+                    totalLabel.setText("Total: $" + totalAmount[0]);
+
+                    // Update product list
+                    StringBuilder updatedProducts = new StringBuilder("Available Products:\n");
+                    for (int i = 0; i < products.length; i++) {
+                        updatedProducts.append((i + 1))
+                                .append(". ")
+                                .append(products[i])
+                                .append(" - $")
+                                .append(prices[i])
+                                .append(" (Stock: ")
+                                .append(stock[i])
+                                .append(")\n");
+                    }
+                    productList.setText(updatedProducts.toString());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        checkoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(frame, "Your total bill is: $" + totalAmount[0] + "\nThank you for shopping with us!", "Bill", JOptionPane.INFORMATION_MESSAGE);
+                System.exit(0);
+            }
+        });
+
+        // Show frame
+        frame.setVisible(true);
+    }
+}
